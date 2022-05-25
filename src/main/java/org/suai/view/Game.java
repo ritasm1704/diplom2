@@ -1,9 +1,13 @@
 package org.suai.view;
 
 import org.suai.model.Arena;
+import org.suai.model.ArenaModel;
+import org.suai.model.InputComponent;
 
 import javax.swing.*;
 import java.awt.*;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
 public class Game extends JFrame {
@@ -18,7 +22,7 @@ public class Game extends JFrame {
 
         System.out.println("Creating Arena");
         //arena = new Arena(100,70);
-        arena = new Arena(title, numberOfMonsters);
+        arena = new Arena(title, numberOfMonsters, false);
         Container c = getContentPane();
         c.add(arena);
 
@@ -48,15 +52,14 @@ public class Game extends JFrame {
                 lastTime = System.currentTimeMillis();
             }
             arena.update();
-
             //isOver = arena.getIsOver();
-            //isOver = true;
+            //sOver = true;
         }
         this.dispose();
     }
 
     public static void main(String[] args) {
-        Game game = new Game("map2.txt", 5);
+        Game game = new Game("map6.txt", 1);
         game.loop();
     }
 }

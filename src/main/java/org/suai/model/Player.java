@@ -18,6 +18,7 @@ public class Player extends GameObject {
 
     int timeout = 100;
     long lastTime;
+    int numberOfMonster = -1;
 
 
     public Player(int x, int y, int width, int height, int maxHealth, int minSpeed, int maxSpeed, int number) {
@@ -28,7 +29,7 @@ public class Player extends GameObject {
         this.minSpeed = minSpeed;
         this.speed = minSpeed;
         this.maxSpeed = maxSpeed;
-        this.weapon = new Weapon(10, 1);
+        this.weapon = new Weapon(10, 2, 0);
         this.number = number;
         lastTime = System.currentTimeMillis();
     }
@@ -39,6 +40,9 @@ public class Player extends GameObject {
         }
         else {
             health -= a;
+        }
+        if (health == 0) {
+            isDead = true;
         }
     }
 
@@ -101,7 +105,54 @@ public class Player extends GameObject {
         isRunning = a;
     }
 
-    public void update(InputComponent inputComponent, int[][] arena) {
+    public void searchForMonster(ArrayList<Monster> monsters) {
+        if (numberOfMonster != -1) {
+            for (int i = 0; i < monsters.size(); i++) {
+                Monster monster = monsters.get(i);
+                if (i == numberOfMonster) {
+                    if (monster.isDead) {
+                        numberOfMonster = -1;
+                    }
+                    else {
+                        if ((getX() + weapon.getRadius() > monster.getX() && getX() - weapon.getRadius() < monster.getX()) &&
+                                (getY() + weapon.getRadius() > monster.getY() && getY() - weapon.getRadius() < monster.getY())) {
+                            numberOfMonster = i;
+                        } else {
+                            numberOfMonster = -1;
+                        }
+                    }
+                }
+            }
+        }
+        //поиск нового игрока
+        if (numberOfMonster == -1) {
+            int tmpNearest = Math.abs(getX() - monsters.get(0).getX()) + Math.abs(getY() - monsters.get(0).getY());
+            int tmp = 0;
+            for (int i = 0; i < monsters.size(); i++) {
+                Monster monster = monsters.get(i);
+                if (!monster.isDead) {
+                    if ((getX() + weapon.getRadius() > monster.getX() && getX() - weapon.getRadius() < monster.getX()) &&
+                            (getY() + weapon.getRadius() > monster.getY() && getY() - weapon.getRadius() < monster.getY())) {
+                        tmp = Math.abs(getX() - monster.getX()) + Math.abs(getY() - monster.getY());
+                        if (tmp <= tmpNearest) {
+                            numberOfMonster = i;
+                            tmpNearest = tmp;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    public void update(InputComponent inputComponent, int[][] arena, ArrayList<Monster> monsters) {
+
+        if (inputComponent.space) {
+            searchForMonster(monsters);
+            if (numberOfMonster != -1) {
+                weapon.doAttack(monsters.get(numberOfMonster));
+            }
+            inputComponent.space = false;
+        }
 
         long delta = System.currentTimeMillis() - lastTime;
         if (delta > timeout) {

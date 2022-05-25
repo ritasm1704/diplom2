@@ -1,28 +1,33 @@
 package org.suai.model;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 public class Monster extends GameObject{
 
     private boolean isRunning = false;
+    boolean isDead = false;
     private int health;
+    private int maxHealth;
     private int speed;
     private Weapon weapon;
     private int radiusVisibility;
     int numberOfPlayer = -1;
     int[][] copyOfArena;
+    int[][] copyOfArena2;
 
-    int timeout = 200;
-    //int timeout = 5;
+    int timeout = 0;
     long lastTime;
 
-    public Monster(int x, int y, int width, int height, int health, int speed, int radiusVisibility, Weapon weapon) {
+    boolean alg2;
+
+    public Monster(int x, int y, int width, int height, int health, int speed, int radiusVisibility, Weapon weapon, boolean alg2) {
         super(x, y, width, height);
         this.health = health;
+        this.maxHealth = health;
         this.speed = speed;
         this.radiusVisibility = radiusVisibility;
         this.weapon = weapon;
+        this.alg2 = alg2;
     }
 
     public void itIsRunning(boolean a) {
@@ -71,76 +76,231 @@ public class Monster extends GameObject{
             }
         }
 
-        long delta = System.currentTimeMillis() - lastTime;
+        if (nearest != null) {
+            if (getX() + weapon.getRadius() > nearest.getX() && getX() - weapon.getRadius() < nearest.getX() &&
+                    getY() + weapon.getRadius() > nearest.getY() && getY() - weapon.getRadius() < nearest.getY()) {
+                //weapon.doAttack(nearest);
+            } else {
+                long delta = System.currentTimeMillis() - lastTime;
+                if (delta > timeout) {
+                    int xStart = getX();
+                    int yStart = getY();
+                    int xFinish = nearest.getX();
+                    int yFinish = nearest.getY();
 
-        if (delta > timeout) {
-            //поиск кратчайшего пути до игрока (волновой алгоритм (алгоритм Ли))
-            if (nearest != null) {
-                int xStart = getX();
-                int yStart = getY();
-                int xFinish = nearest.getX();
-                int yFinish = nearest.getY();
+                    copyOfArena = new int[arena.length][arena[0].length];
 
-                copyOfArena = new int[arena.length][arena[0].length];
-
-                for (int i = 0; i < arena.length; i++) {
-                    for (int j = 0; j < arena[0].length; j++) {
-                        if (arena[i][j] == -1) {
-                            copyOfArena[i][j] = Integer.MAX_VALUE;
-                        }
-                        else {
-                            copyOfArena[i][j] = 0;
-                        }
-                    }
-                }
-
-                int maxPath = copyOfArena.length * copyOfArena[0].length;
-                boolean flag;
-                copyOfArena[yStart][xStart] = 1;
-                for (int k = 1; k < maxPath; k++) {
-                    //System.out.println(k);
-                    flag = true;
-                    for (int i = 0; i < copyOfArena.length; i++) {
-                        for (int j = 0; j < copyOfArena[0].length; j++) {
-                            if (copyOfArena[i][j] == 0) {
-                                flag = false;
+                    for (int i = 0; i < arena.length; i++) {
+                        for (int j = 0; j < arena[0].length; j++) {
+                            if (arena[i][j] == -1) {
+                                copyOfArena[i][j] = Integer.MAX_VALUE;
                             }
-                            if (copyOfArena[yFinish][xFinish] != 0) {
-                                if (copyOfArena[i][j] == 0) {
-                                    copyOfArena[i][j] = Integer.MAX_VALUE;
-                                }
-                            } else {
-                                if (copyOfArena[i][j] == k) {
-                                    algorithmLee(j, i, k + 1);
-                                }
+                            else {
+                                copyOfArena[i][j] = 0;
                             }
-
                         }
                     }
-                    if (flag) {
-                        break;
+
+                    copyOfArena2 = new int[arena.length][arena[0].length];
+
+                    for (int i = 0; i < arena.length; i++) {
+                        for (int j = 0; j < arena[0].length; j++) {
+                            copyOfArena2[i][j] = 0;
+                        }
                     }
-                }
 
-                /*for (int i = 0; i < copyOfArena.length; i++) {
-                    for (int j = 0; j < copyOfArena[0].length; j++) {
-                        System.out.print(copyOfArena[i][j] + " ");
+                    if (!alg2) {
+                        //поиск кратчайшего пути до игрока (волновой алгоритм (алгоритм Ли))
+                        algorithm1(yStart, xStart, yFinish, xFinish);
+                    } else {
+                        //поиск кратчайшего пути до игрока (алгоритм A*)
+                        algorithm2(yStart, xStart, yFinish, xFinish);
                     }
-                    System.out.println();
-                }*/
-
-                int[] masPrev = new int[]{xFinish, yFinish};
-                int[] mas = new int[]{xFinish, yFinish};
-
-                while (!(mas[0] == xStart && mas[1] == yStart)) {
-                    //System.out.println(mas[0] + " " + mas[1]);
-                    masPrev = mas;
-                    mas = getNextStep(mas[0], mas[1]);
+                    lastTime = System.currentTimeMillis();
                 }
-                setX(masPrev[0]);
-                setY(masPrev[1]);
             }
-            lastTime = System.currentTimeMillis();
+        }
+    }
+
+    ArrayList<Node> visited2;
+    PriorityQueue<Node> queue2;
+
+    public void algorithm2(int yStart, int xStart, int yFinish, int xFinish) {
+        //поиск кратчайшего пути до игрока (алгоритм A*)
+        queue2 = new PriorityQueue<>(Node::compare2);
+        queue2.add(new Node(xStart, yStart, 0, 0, null));
+
+        visited2 = new ArrayList<>();
+        visited2.add(new Node(xStart, yStart, 0, 0, null));
+        copyOfArena2[yStart][xStart] = 1;
+        while (true) {
+
+            Node current = queue2.poll();
+
+            if (current == null) {
+                break;
+            }
+            int x = current.x;
+            int y = current.y;
+            if (x == xFinish && y == yFinish) {
+                searchForCoordinates2(current, yStart, xStart);
+                break;
+            }
+
+            searchForNeighbors2(x + 1, y, current, yFinish, xFinish);
+            searchForNeighbors2(x, y + 1, current, yFinish, xFinish);
+            searchForNeighbors2(x + 1, y + 1, current, yFinish, xFinish);
+            searchForNeighbors2(x - 1, y, current, yFinish, xFinish);
+            searchForNeighbors2(x, y - 1, current, yFinish, xFinish);
+            searchForNeighbors2(x - 1, y - 1, current, yFinish, xFinish);
+            searchForNeighbors2(x + 1, y - 1, current, yFinish, xFinish);
+            searchForNeighbors2(x - 1, y + 1, current, yFinish, xFinish);
+        }
+    }
+
+    public void searchForCoordinates2(Node node, int yStart, int xStart) {
+
+        //int count = 0;
+
+
+        //System.out.println(visited2.size());
+        while (!(node.cameFrom.x == xStart && node.cameFrom.y == yStart)) {
+            for (int i = 0; i < visited2.size(); i++) {
+                if (visited2.get(i).x == node.cameFrom.x && visited2.get(i).y == node.cameFrom.y) {
+                    copyOfArena2[visited2.get(i).y][visited2.get(i).x] = 2;
+                    node = visited2.get(i);
+                    break;
+                }
+            }
+        }
+
+        /*int count = 0;
+        for (int i = 0; i < copyOfArena2.length; i++) {
+            for (int j = 0; j < copyOfArena2[0].length; j++) {
+                System.out.print(copyOfArena2[i][j]);
+                count += copyOfArena2[i][j];
+            }
+            System.out.println();
+        }
+        System.out.println(count);*/
+
+        setX(node.x);
+        setY(node.y);
+    }
+
+    public void searchForNeighbors2(int x, int y, Node node, int yFinish, int xFinish) {
+        if (y < copyOfArena.length && y >= 0) {
+            if (x < copyOfArena[0].length && x >= 0) {
+                if (copyOfArena[y][x] == 0) {
+                    copyOfArena2[y][x] = 1;
+                    int newCost = node.costSoFar + 1;
+                    int priority = newCost + Math.abs(x - xFinish) + Math.abs(y - yFinish);
+                    boolean flag = true;
+                    for (int i = 0; i < visited2.size(); i++) {
+                        if (visited2.get(i).x == x && visited2.get(i).y == y) {
+                            flag = false;
+                            if (newCost < visited2.get(i).costSoFar) {
+                                visited2.get(i).costSoFar = newCost;
+                                visited2.get(i).priority = priority;
+                                visited2.get(i).cameFrom = node;
+                                queue2.add(visited2.get(i));
+                            }
+                            break;
+                        }
+                    }
+
+                    if (flag) {
+                        Node node1 = new Node(x, y, priority, newCost, node);
+                        visited2.add(node1);
+                        queue2.add(node1);
+                    }
+                }
+            }
+        }
+    }
+
+    LinkedList<Node> queue;
+
+    public void algorithm1(int yStart, int xStart, int yFinish, int xFinish) {
+        //поиск кратчайшего пути до игрока (волновой алгоритм (алгоритм Ли))
+        queue = new LinkedList<>();
+        queue.add(new Node(xStart, yStart, 0, 1, null));
+
+        copyOfArena[yStart][xStart] = 1;
+        copyOfArena2[yStart][xStart] = 1;
+        while (true) {
+
+            Node current = queue.poll();
+
+            if (current == null) {
+                break;
+            }
+            int x = current.x;
+            int y = current.y;
+            if (x == xFinish && y == yFinish) {
+                searchForCoordinates(current, yStart, xStart);
+                break;
+            }
+
+            searchForNeighbors(x + 1, y, current);
+            searchForNeighbors(x, y + 1, current);
+            searchForNeighbors(x + 1, y + 1, current);
+            searchForNeighbors(x - 1, y, current);
+            searchForNeighbors(x, y - 1, current);
+            searchForNeighbors(x - 1, y - 1, current);
+            searchForNeighbors(x + 1, y - 1, current);
+            searchForNeighbors(x - 1, y + 1, current);
+        }
+    }
+
+    public void searchForCoordinates(Node node, int yStart, int xStart) {
+
+
+
+        for (int i = 0; i < copyOfArena.length; i++) {
+            for (int j = 0; j < copyOfArena[0].length; j++) {
+                if (copyOfArena[i][j] == 0) {
+                    copyOfArena[i][j] = Integer.MAX_VALUE;
+                }
+            }
+        }
+
+        int[] masPrev = new int[]{node.x, node.y};
+        int[] mas = new int[]{node.x, node.y};
+
+        while (!(mas[0] == xStart && mas[1] == yStart)) {
+            //System.out.println(mas[0] + " " + mas[1]);
+            masPrev = mas;
+            copyOfArena2[mas[1]][mas[0]] = 2;
+            mas = getNextStep(mas[0], mas[1]);
+        }
+
+        /*int count = 0;
+        for (int i = 0; i < copyOfArena2.length; i++) {
+            for (int j = 0; j < copyOfArena2[0].length; j++) {
+                System.out.print(copyOfArena2[i][j]);
+                count += copyOfArena2[i][j];
+            }
+            System.out.println();
+        }
+        System.out.println(count);*/
+
+        setX(masPrev[0]);
+        setY(masPrev[1]);
+    }
+
+    public void searchForNeighbors(int x, int y, Node node) {
+        if (y < copyOfArena.length && y >= 0) {
+            if (x < copyOfArena[0].length && x >= 0) {
+                if (copyOfArena[y][x] != Integer.MAX_VALUE) {
+                    int newCost = node.costSoFar + 1;
+                    if (newCost < copyOfArena[y][x] || copyOfArena[y][x] == 0) {
+                        copyOfArena[y][x] = newCost;
+                        queue.add(new Node(x, y, 0, newCost, node));
+                        copyOfArena2[y][x] = 1;
+                    }
+                }
+            }
         }
     }
 
@@ -300,5 +460,25 @@ public class Monster extends GameObject{
             }
         }
         return new int[] {minX, minY};
+    }
+
+    public void reduceHealth(int a) {
+        if (health - a < 0) {
+            health = 0;
+        }
+        else {
+            health -= a;
+        }
+        if (health == 0) {
+            isDead = true;
+        }
+    }
+
+    public int getHealth() {
+        return health;
+    }
+
+    public int getMaxHealth() {
+        return maxHealth;
     }
 }

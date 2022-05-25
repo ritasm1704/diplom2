@@ -1,6 +1,7 @@
 package org.suai.tests;
 
 import org.suai.model.ArenaModel;
+import org.suai.model.InputComponent;
 import org.suai.view.Game;
 
 import java.io.File;
@@ -10,18 +11,21 @@ import java.util.Scanner;
 
 public class Test {
 
-    public static void main(String[] args) {
+    int startNumberOfMonsters = 0;
+    int numberOfMonsters = 0;
+    int delta = 0;
+    int numberOfTests = 0;
 
-        int numberOfMonsters = 0;
-        int delta = 0;
-
-        File doc = new File("forTest.txt");
+    public Test(String fileName) {
+        File doc = new File(fileName);
         try(Scanner scanner = new Scanner(doc))
         {
             while (scanner.hasNextLine()) {
                 String[] str = scanner.nextLine().split(" ");
-                numberOfMonsters = Integer.parseInt(str[0]);
-                delta = Integer.parseInt(str[1]);
+                startNumberOfMonsters = Integer.parseInt(str[0]);
+                numberOfMonsters = Integer.parseInt(str[1]);
+                delta = Integer.parseInt(str[2]);
+                numberOfTests = Integer.parseInt(str[3]);
                 break;
             }
         }
@@ -29,9 +33,14 @@ public class Test {
             System.out.println(ex.getMessage());
         }
 
+        System.out.println("start Number Of Monsters: " + startNumberOfMonsters);
+        System.out.println("number Of Monsters: " + numberOfMonsters);
+        System.out.println("delta: " + delta);
+        System.out.println("number Of Tests: " + numberOfTests);
+
         try(FileWriter writer = new FileWriter("monsters.txt", false))
         {
-            for (int monsters = 1; monsters <= numberOfMonsters; monsters += delta) {
+            for (int monsters = startNumberOfMonsters; monsters <= numberOfMonsters; monsters += delta) {
                 writer.write(monsters + "\n");
             }
             writer.flush();
@@ -39,60 +48,70 @@ public class Test {
         catch(IOException ex){
             System.out.println(ex.getMessage());
         }
+    }
 
-        /*Game game = new Game("map1.txt", 1);
-        game.loop();*/
-        try(FileWriter writer = new FileWriter("testMap1.txt", false))
+    public void test(String nameOfMap, String nameOfTest, boolean log2) {
+        try(FileWriter writer = new FileWriter(nameOfTest, false))
         {
-            for (int monsters = 1; monsters <= numberOfMonsters; monsters += delta) {
-                Game game = new Game("map1.txt", monsters);
-                game.loop();
-                writer.write(game.getSum() + "\n");
+            for (int monsters = startNumberOfMonsters; monsters <= numberOfMonsters; monsters += delta) {
+                int number = 10000;
+                long sum = 0;
+
+                for (int i = 0; i < number; i++) {
+                    boolean isOver = false;
+                    ArenaModel arenaModel = new ArenaModel(nameOfMap, monsters, log2);
+
+                    int count = 0;
+                    while (!isOver) {
+
+                        count++;
+                        long lastTime = System.currentTimeMillis();
+                        arenaModel.update(null);
+                        long deltaT = System.currentTimeMillis() - lastTime;
+                        sum += deltaT;
+                        if (count == numberOfTests) {
+                            isOver = true;
+                        }
+                    }
+                }
+                //System.out.println(deltaT / numberOfTests);
+                writer.write(sum/number + "\n");
             }
             writer.flush();
         }
         catch(IOException ex){
             System.out.println(ex.getMessage());
         }
+    }
 
-        try(FileWriter writer = new FileWriter("testMap2.txt", false))
-        {
-            for (int monsters = 1; monsters <= numberOfMonsters; monsters += delta) {
-                Game game = new Game("map2.txt", monsters);
-                game.loop();
-                writer.write(game.getSum() + "\n");
-            }
-            writer.flush();
-        }
-        catch(IOException ex){
-            System.out.println(ex.getMessage());
-        }
+    public static void main(String[] args) {
 
-        try(FileWriter writer = new FileWriter("testMap3.txt", false))
-        {
-            for (int monsters = 1; monsters <= numberOfMonsters; monsters += delta) {
-                Game game = new Game("map3.txt", monsters);
-                game.loop();
-                writer.write(game.getSum() + "\n");
-            }
-            writer.flush();
-        }
-        catch(IOException ex){
-            System.out.println(ex.getMessage());
-        }
+        Test test = new Test("forTest.txt");
+        System.out.println("test1");
+        test.test("map1.txt", "testMap1.txt", false);
+        System.out.println("test2");
+        test.test("map2.txt", "testMap2.txt", false);
+        /*System.out.println("test3");
+        test.test("map3.txt", "testMap3.txt", false);
+        System.out.println("test4");
+        test.test("map4.txt", "testMap4.txt", false);*/
 
-        try(FileWriter writer = new FileWriter("testMap4.txt", false))
-        {
-            for (int monsters = 1; monsters <= numberOfMonsters; monsters += delta) {
-                Game game = new Game("map4.txt", monsters);
-                game.loop();
-                writer.write(game.getSum() + "\n");
-            }
-            writer.flush();
-        }
-        catch(IOException ex){
-            System.out.println(ex.getMessage());
-        }
+        System.out.println("test5");
+        test.test("map1.txt", "testMap5.txt", true);
+        System.out.println("test6");
+        test.test("map2.txt", "testMap6.txt", true);
+        /*System.out.println("test7");
+        test.test("map3.txt", "testMap7.txt", true);
+        System.out.println("test8");
+        test.test("map4.txt", "testMap8.txt", true);*/
 
+        /*System.out.println("test9");
+        test.test("map5.txt", "testMap9.txt", false);
+        System.out.println("test10");
+        test.test("map6.txt", "testMap10.txt", false);
+        System.out.println("test11");
+        test.test("map5.txt", "testMap11.txt", true);
+        System.out.println("test12");
+        test.test("map6.txt", "testMap12.txt", true);*/
     }
 }

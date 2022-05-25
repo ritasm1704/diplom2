@@ -14,6 +14,7 @@ public class Arena extends JPanel {
 
     private final int tileWidth = 10;
     private final int tileHeight = 10;
+    private int mainPlayer = 0;
 
     class MyKeyInputHandler extends KeyAdapter {
 
@@ -25,6 +26,7 @@ public class Arena extends JPanel {
                 case (KeyEvent.VK_A) -> inputComponent.leftPressed = true;
                 case (KeyEvent.VK_W) -> inputComponent.upPressed = true;
                 case (KeyEvent.VK_S) -> inputComponent.downPressed = true;
+                case (KeyEvent.VK_SPACE) -> inputComponent.space = true;
             }
         }
         @Override
@@ -37,17 +39,13 @@ public class Arena extends JPanel {
                 case (KeyEvent.VK_S) -> inputComponent.downPressed = false;
             }
         }
-        @Override
-        public void  keyTyped(KeyEvent e) {
-
-        }
     }
 
-    public Arena(String nameOfMap, int numberOfMonsters) {
+    public Arena(String nameOfMap, int numberOfMonsters, boolean alg2) {
 
         this.addKeyListener(new MyKeyInputHandler());
         setFocusable(true);
-        arenaModel = new ArenaModel(nameOfMap, numberOfMonsters);
+        arenaModel = new ArenaModel(nameOfMap, numberOfMonsters, alg2);
     }
 
     public void paintComponent(Graphics g) {
@@ -70,26 +68,51 @@ public class Arena extends JPanel {
 
         ArrayList<Player> players = arenaModel.getPlayers();
 
+        int xH = 100;
+        int yH = 20;
+        int l = 200;
+
         for (int i = 0; i < players.size(); i++) {
-            g.setColor(Color.blue);
+
             if (!players.get(i).isDead) {
-                g.fillRect(players.get(i).getX()*tileHeight, players.get(i).getY()*tileWidth,
-                        players.get(i).getWidth(), players.get(i).getHeight());
+                g.setColor(Color.blue);
+            }
+            else {
+                g.setColor(Color.white);
+            }
+            g.fillRect(players.get(i).getX()*tileWidth, players.get(i).getY()*tileHeight,
+                    players.get(i).getWidth(), players.get(i).getHeight());
+            if (i == mainPlayer) {
+                int tmp = (int)(players.get(i).getHealth() / (players.get(i).getMaxHealth() * 0.01) * (l * 0.01));
+                g.setColor(new Color(14, 92, 38));
+                g.fillRect(xH, yH, tmp, 20);
+
+                g.setColor(new Color(92, 14, 14));
+                g.fillRect(xH + tmp, yH, l - tmp, 20);
             }
         }
 
         ArrayList<Monster> monsters = arenaModel.getMonsters();
-        boolean tmp = true;
-        for (int i = 0; i < monsters.size(); i++) {
-            g.setColor(Color.black);
-            if (players.get(0).getX() != monsters.get(i).getX() || players.get(0).getY() != monsters.get(i).getY()) {
-                tmp = false;
 
+        for (int i = 0; i < monsters.size(); i++) {
+            if (!monsters.get(i).isDead) {
+                int xHM = monsters.get(i).getX() * tileWidth - 5;
+                int yHM = monsters.get(i).getY() * tileHeight - 10;
+                int lM = 20;
+
+                int tmpM = (int)(monsters.get(i).getHealth() / (monsters.get(i).getMaxHealth() * 0.01) * (lM * 0.01));
+                g.setColor(new Color(14, 92, 38));
+                g.fillRect(xHM, yHM, tmpM, 5);
+
+                g.setColor(new Color(92, 14, 14));
+                g.fillRect(xHM + tmpM, yHM, lM - tmpM, 5);
+
+                g.setColor(Color.black);
+
+                g.fillRect(monsters.get(i).getX()*tileHeight, monsters.get(i).getY()*tileWidth,
+                        monsters.get(i).getWidth(), monsters.get(i).getHeight());
             }
-            g.fillRect(monsters.get(i).getX()*tileHeight, monsters.get(i).getY()*tileWidth,
-                    monsters.get(i).getWidth(), monsters.get(i).getHeight());
         }
-        isOver = tmp;
     }
 
     public void update() {

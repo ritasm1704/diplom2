@@ -15,23 +15,12 @@ public class ArenaModel {
     ArrayList<Monster> monsters = new ArrayList<>();
     ArrayList<Player> players = new ArrayList<>();
 
-    public ArenaModel(String nameOfMap, int numberOfMonsters) {
+    public ArenaModel(String nameOfMap, int numberOfMonsters, boolean alg2) {
 
-        /*arenaAsMas = new int[heightOfArena][widthOfArena];
-        for (int i = 0; i < heightOfArena; i++) {
-            for (int j = 0; j < widthOfArena; j++) {
-                if (i == 0 || i == heightOfArena - 1 || j == 0 || j == widthOfArena - 1) {
-                    arenaAsMas[i][j] = -1;
-                }
-                else {
-                    arenaAsMas[i][j] = 0;
-                }
-            }
-        }*/
         readArena(nameOfMap);
         players.add(new Player(1,1, 10, 10, 100, 1, 1, 1));
         for (int i = 0; i < numberOfMonsters; i++) {
-            monsters.add(new Monster(widthOfArena - 2,heightOfArena - 2, 10,10,100, 1, 1000, new Weapon(1,1)));
+            monsters.add(new Monster(widthOfArena - 2,heightOfArena - 2, 10,10,100, 1, 1000, new Weapon(10,2, 2000), alg2));
         }
 
     }
@@ -39,11 +28,13 @@ public class ArenaModel {
     public void update(InputComponent inputComponent) {
         //System.out.println("update arena");
         for (int i = 0; i < monsters.size(); i++) {
-            monsters.get(i).update(arenaAsMas, players);
+            if (!monsters.get(i).isDead) {
+                monsters.get(i).update(arenaAsMas, players);
+            }
         }
-        for (int i = 0; i < players.size(); i++) {
-            players.get(i).update(inputComponent, arenaAsMas);
-        }
+        /*for (int i = 0; i < players.size(); i++) {
+            players.get(i).update(inputComponent, arenaAsMas, monsters);
+        }*/
     }
 
     public ArrayList<Player> getPlayers() {

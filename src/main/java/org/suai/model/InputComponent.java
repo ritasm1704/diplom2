@@ -5,6 +5,7 @@ public class InputComponent {
     boolean rightPressed = false;
     boolean downPressed = false;
     boolean upPressed = false;
+    boolean space = false;
 
     public InputComponent() {
 
