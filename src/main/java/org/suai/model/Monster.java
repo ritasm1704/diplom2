@@ -13,7 +13,7 @@ public class Monster extends GameObject{
     private int radiusVisibility;
     int numberOfPlayer = -1;
     int[][] copyOfArena;
-    int[][] copyOfArena2;
+    //int[][] copyOfArena2;
 
     int timeout = 0;
     long lastTime;
@@ -101,13 +101,13 @@ public class Monster extends GameObject{
                         }
                     }
 
-                    copyOfArena2 = new int[arena.length][arena[0].length];
+                    /*copyOfArena2 = new int[arena.length][arena[0].length];
 
                     for (int i = 0; i < arena.length; i++) {
                         for (int j = 0; j < arena[0].length; j++) {
                             copyOfArena2[i][j] = 0;
                         }
-                    }
+                    }*/
 
                     if (!alg2) {
                         //поиск кратчайшего пути до игрока (волновой алгоритм (алгоритм Ли))
@@ -132,7 +132,7 @@ public class Monster extends GameObject{
 
         visited2 = new ArrayList<>();
         visited2.add(new Node(xStart, yStart, 0, 0, null));
-        copyOfArena2[yStart][xStart] = 1;
+        //copyOfArena2[yStart][xStart] = 1;
         while (true) {
 
             Node current = queue2.poll();
@@ -167,7 +167,7 @@ public class Monster extends GameObject{
         while (!(node.cameFrom.x == xStart && node.cameFrom.y == yStart)) {
             for (int i = 0; i < visited2.size(); i++) {
                 if (visited2.get(i).x == node.cameFrom.x && visited2.get(i).y == node.cameFrom.y) {
-                    copyOfArena2[visited2.get(i).y][visited2.get(i).x] = 2;
+                    //copyOfArena2[visited2.get(i).y][visited2.get(i).x] = 2;
                     node = visited2.get(i);
                     break;
                 }
@@ -192,7 +192,7 @@ public class Monster extends GameObject{
         if (y < copyOfArena.length && y >= 0) {
             if (x < copyOfArena[0].length && x >= 0) {
                 if (copyOfArena[y][x] == 0) {
-                    copyOfArena2[y][x] = 1;
+                    //copyOfArena2[y][x] = 1;
                     int newCost = node.costSoFar + 1;
                     int priority = newCost + Math.abs(x - xFinish) + Math.abs(y - yFinish);
                     boolean flag = true;
@@ -227,7 +227,7 @@ public class Monster extends GameObject{
         queue.add(new Node(xStart, yStart, 0, 1, null));
 
         copyOfArena[yStart][xStart] = 1;
-        copyOfArena2[yStart][xStart] = 1;
+        //copyOfArena2[yStart][xStart] = 1;
         while (true) {
 
             Node current = queue.poll();
@@ -271,7 +271,7 @@ public class Monster extends GameObject{
         while (!(mas[0] == xStart && mas[1] == yStart)) {
             //System.out.println(mas[0] + " " + mas[1]);
             masPrev = mas;
-            copyOfArena2[mas[1]][mas[0]] = 2;
+            //copyOfArena2[mas[1]][mas[0]] = 2;
             mas = getNextStep(mas[0], mas[1]);
         }
 
@@ -297,54 +297,9 @@ public class Monster extends GameObject{
                     if (newCost < copyOfArena[y][x] || copyOfArena[y][x] == 0) {
                         copyOfArena[y][x] = newCost;
                         queue.add(new Node(x, y, 0, newCost, node));
-                        copyOfArena2[y][x] = 1;
+                        //copyOfArena2[y][x] = 1;
                     }
                 }
-            }
-        }
-    }
-
-    public void algorithmLee(int x, int y, int serialNumber) {
-
-        //разметка карты
-        if (y + 1 < copyOfArena.length) {
-            if (copyOfArena[y + 1][x] == 0) {
-                copyOfArena[y + 1][x] = serialNumber;
-            }
-            if (x + 1 < copyOfArena[0].length) {
-                if (copyOfArena[y + 1][x + 1] == 0) {
-                    copyOfArena[y + 1][x + 1] = serialNumber;
-                }
-            }
-            if (x - 1 >= 0) {
-                if (copyOfArena[y + 1][x - 1] == 0) {
-                    copyOfArena[y + 1][x - 1] = serialNumber;
-                }
-            }
-        }
-        if (y - 1 >= 0) {
-            if (copyOfArena[y - 1][x] == 0) {
-                copyOfArena[y - 1][x] = serialNumber;
-            }
-            if (x + 1 < copyOfArena[0].length) {
-                if (copyOfArena[y - 1][x + 1] == 0) {
-                    copyOfArena[y - 1][x + 1] = serialNumber;
-                }
-            }
-            if (x - 1 >= 0) {
-                if (copyOfArena[y - 1][x - 1] == 0) {
-                    copyOfArena[y - 1][x - 1] = serialNumber;
-                }
-            }
-        }
-        if (x + 1 < copyOfArena[0].length) {
-            if (copyOfArena[y][x + 1] == 0) {
-                copyOfArena[y][x + 1] = serialNumber;
-            }
-        }
-        if (x - 1 >= 0) {
-            if (copyOfArena[y][x - 1] == 0) {
-                copyOfArena[y][x - 1] = serialNumber;
             }
         }
     }
