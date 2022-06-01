@@ -1,11 +1,12 @@
 package org.suai.model;
 
+import java.io.Serializable;
 import java.util.*;
 
-public class Monster extends GameObject{
+public class Monster extends GameObject implements Serializable {
 
     private boolean isRunning = false;
-    boolean isDead = false;
+    public boolean isDead = false;
     private int health;
     private int maxHealth;
     private int speed;
@@ -122,16 +123,14 @@ public class Monster extends GameObject{
         }
     }
 
-    ArrayList<Node> visited2;
     PriorityQueue<Node> queue2;
 
     public void algorithm2(int yStart, int xStart, int yFinish, int xFinish) {
         //поиск кратчайшего пути до игрока (алгоритм A*)
-        queue2 = new PriorityQueue<>(Node::compare2);
-        queue2.add(new Node(xStart, yStart, 0, 0, null));
+        queue2 = new PriorityQueue<>(Node::compare);
+        queue2.add(new Node(xStart, yStart, 0, 1, null));
 
-        visited2 = new ArrayList<>();
-        visited2.add(new Node(xStart, yStart, 0, 0, null));
+        copyOfArena[yStart][xStart] = 1;
         //copyOfArena2[yStart][xStart] = 1;
         while (true) {
 
@@ -143,7 +142,7 @@ public class Monster extends GameObject{
             int x = current.x;
             int y = current.y;
             if (x == xFinish && y == yFinish) {
-                searchForCoordinates2(current, yStart, xStart);
+                searchForCoordinates(current, yStart, xStart);
                 break;
             }
 
@@ -158,61 +157,16 @@ public class Monster extends GameObject{
         }
     }
 
-    public void searchForCoordinates2(Node node, int yStart, int xStart) {
-
-        //int count = 0;
-
-
-        //System.out.println(visited2.size());
-        while (!(node.cameFrom.x == xStart && node.cameFrom.y == yStart)) {
-            for (int i = 0; i < visited2.size(); i++) {
-                if (visited2.get(i).x == node.cameFrom.x && visited2.get(i).y == node.cameFrom.y) {
-                    //copyOfArena2[visited2.get(i).y][visited2.get(i).x] = 2;
-                    node = visited2.get(i);
-                    break;
-                }
-            }
-        }
-
-        /*int count = 0;
-        for (int i = 0; i < copyOfArena2.length; i++) {
-            for (int j = 0; j < copyOfArena2[0].length; j++) {
-                System.out.print(copyOfArena2[i][j]);
-                count += copyOfArena2[i][j];
-            }
-            System.out.println();
-        }
-        System.out.println(count);*/
-
-        setX(node.x);
-        setY(node.y);
-    }
-
     public void searchForNeighbors2(int x, int y, Node node, int yFinish, int xFinish) {
         if (y < copyOfArena.length && y >= 0) {
             if (x < copyOfArena[0].length && x >= 0) {
-                if (copyOfArena[y][x] == 0) {
-                    //copyOfArena2[y][x] = 1;
+                if (copyOfArena[y][x] != Integer.MAX_VALUE) {
                     int newCost = node.costSoFar + 1;
                     int priority = newCost + Math.abs(x - xFinish) + Math.abs(y - yFinish);
-                    boolean flag = true;
-                    for (int i = 0; i < visited2.size(); i++) {
-                        if (visited2.get(i).x == x && visited2.get(i).y == y) {
-                            flag = false;
-                            if (newCost < visited2.get(i).costSoFar) {
-                                visited2.get(i).costSoFar = newCost;
-                                visited2.get(i).priority = priority;
-                                visited2.get(i).cameFrom = node;
-                                queue2.add(visited2.get(i));
-                            }
-                            break;
-                        }
-                    }
-
-                    if (flag) {
-                        Node node1 = new Node(x, y, priority, newCost, node);
-                        visited2.add(node1);
-                        queue2.add(node1);
+                    if (newCost < copyOfArena[y][x] || copyOfArena[y][x] == 0) {
+                        copyOfArena[y][x] = newCost;
+                        queue2.add(new Node(x, y, priority, newCost, node));
+                        //copyOfArena2[y][x] = 1;
                     }
                 }
             }

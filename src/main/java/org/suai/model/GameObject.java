@@ -1,8 +1,9 @@
 package org.suai.model;
 
 
+import java.io.Serializable;
 
-public class GameObject {
+public class GameObject implements Serializable {
 
     private int x, y;
     private int width;

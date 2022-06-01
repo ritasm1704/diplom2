@@ -1,4 +1,9 @@
-package org.suai.model;
+package org.suai.view;
+
+import org.suai.model.ArenaModel;
+import org.suai.model.InputComponent;
+import org.suai.model.Monster;
+import org.suai.model.Player;
 
 import javax.swing.*;
 import java.awt.*;
@@ -8,7 +13,7 @@ import java.util.ArrayList;
 
 public class Arena extends JPanel {
 
-    private InputComponent inputComponent = new InputComponent();
+    private InputComponent inputComponent;
     private ArenaModel arenaModel;
     private boolean isOver = false;
 
@@ -41,11 +46,12 @@ public class Arena extends JPanel {
         }
     }
 
-    public Arena(String nameOfMap, int numberOfMonsters, boolean alg2) {
+    public Arena(ArenaModel arenaModel, int numberOfPlayer) {
 
         this.addKeyListener(new MyKeyInputHandler());
         setFocusable(true);
-        arenaModel = new ArenaModel(nameOfMap, numberOfMonsters, alg2);
+        inputComponent = new InputComponent(numberOfPlayer);
+        this.arenaModel = arenaModel;
     }
 
     public void paintComponent(Graphics g) {
@@ -115,13 +121,20 @@ public class Arena extends JPanel {
         }
     }
 
+    public int getNumber() {
+        return inputComponent.numberOfPlayer;
+    }
+
     public void update() {
-        arenaModel.update(inputComponent);
         repaint();
     }
 
     public boolean getIsOver() {
         return isOver;
+    }
+
+    public InputComponent getInputComponent() {
+        return inputComponent;
     }
 
 }

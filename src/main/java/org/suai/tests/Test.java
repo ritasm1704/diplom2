@@ -1,8 +1,6 @@
 package org.suai.tests;
 
 import org.suai.model.ArenaModel;
-import org.suai.model.InputComponent;
-import org.suai.view.Game;
 
 import java.io.File;
 import java.io.FileWriter;

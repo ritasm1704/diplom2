@@ -3,10 +3,11 @@ package org.suai.model;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-public class ArenaModel {
+public class ArenaModel implements Serializable {
 
     private int widthOfArena;
     private int heightOfArena;
@@ -32,9 +33,13 @@ public class ArenaModel {
                 monsters.get(i).update(arenaAsMas, players);
             }
         }
-        /*for (int i = 0; i < players.size(); i++) {
-            players.get(i).update(inputComponent, arenaAsMas, monsters);
-        }*/
+
+        for (int i = 0; i < players.size(); i++) {
+            if (players.get(i).number == inputComponent.numberOfPlayer) {
+                players.get(i).update(inputComponent, arenaAsMas, monsters);
+                break;
+            }
+        }
     }
 
     public ArrayList<Player> getPlayers() {

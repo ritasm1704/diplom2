@@ -1,6 +1,8 @@
 package org.suai.model;
 
-public class Weapon {
+import java.io.Serializable;
+
+public class Weapon implements Serializable {
     private int damage;
     private int radius;
     private int timeoutForAttack;

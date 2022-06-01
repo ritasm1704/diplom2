@@ -1,13 +1,14 @@
 package org.suai.model;
 
 import java.awt.event.KeyEvent;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 
-public class Player extends GameObject {
+public class Player extends GameObject implements Serializable {
 
     int number;
-    boolean isDead = false;
+    public boolean isDead = false;
     private boolean isRunning = false;
     private int health;
     private int maxHealth;

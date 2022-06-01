@@ -1,13 +1,18 @@
 package org.suai.model;
 
-public class InputComponent {
-    boolean leftPressed = false;
-    boolean rightPressed = false;
-    boolean downPressed = false;
-    boolean upPressed = false;
-    boolean space = false;
+import java.io.Serializable;
 
-    public InputComponent() {
+public class InputComponent implements Serializable {
 
+    public int numberOfPlayer;
+
+    public boolean leftPressed = false;
+    public boolean rightPressed = false;
+    public boolean downPressed = false;
+    public boolean upPressed = false;
+    public boolean space = false;
+
+    public InputComponent(int numberOfPlayer) {
+        this.numberOfPlayer = numberOfPlayer;
     }
 }

@@ -2,7 +2,9 @@ package org.suai.model;
 
 import org.jetbrains.annotations.NotNull;
 
-public class Node {
+import java.io.Serializable;
+
+public class Node implements Serializable {
     int x, y;
     int priority;
     int costSoFar;
