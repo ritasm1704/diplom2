@@ -8,6 +8,7 @@ import java.io.*;
 import java.net.*;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Connection extends Thread {
 
@@ -17,6 +18,9 @@ public class Connection extends Thread {
 
     private int portClient;
     private InetAddress addressClient;
+    private GameServer gameServer;
+    ServerInput serverInput;
+    ServerOutput serverOutput;
 
     private InputComponent inputComponent;
     Server server;
@@ -26,16 +30,20 @@ public class Connection extends Thread {
     public Connection(int port, InetAddress addressClient, int portClient, Server server) throws UnknownHostException, SocketException {
         //address = InetAddress.getByName(host);
         //this.port = port;
+        //this.gameServer = gameServer;
         serverSocket = new DatagramSocket(port);
         this.addressClient = addressClient;
         this.portClient = portClient;
         this.server = server;
+        serverInput = new ServerInput(addressClient, port + 1);
+        serverOutput = new ServerOutput(addressClient, port + 2);
         this.start();
     }
 
     @Override
     public void run() {
         try {
+            //ServerInput serverInput = new ServerInput("localhost", 2003, 2002);
             while (true) {
                 if (!startGame) {
                     DatagramPacket receivePacket = new DatagramPacket(new byte[1000], 1000);
@@ -51,6 +59,11 @@ public class Connection extends Thread {
                                     receiveString.split(" ")[2], this);
                             gameServer.start();
                             server.setGameServer(gameServer);
+                            this.gameServer = gameServer;
+                            gameServer.addPlayer(0);
+                            serverInput.setGameServer(this.gameServer);
+                            serverInput.start();
+                            serverOutput.start();
                             String sendString = "OK";
                             System.out.println("Server: " + sendString);
                             byte[] buf = sendString.getBytes();
@@ -93,16 +106,12 @@ public class Connection extends Thread {
                         }
                     }
                 } else {
-                    System.out.println("Server receive");
-                    DatagramPacket receivePacket = new DatagramPacket(new byte[139], 139);
-                    serverSocket.receive(receivePacket);
-                    ByteArrayInputStream bais = new ByteArrayInputStream(receivePacket.getData());
-                    ObjectInputStream ois = new ObjectInputStream(bais);
-                    inputComponent = (InputComponent) ois.readObject();
+                    //inputComponent = serverInput.getInputComponent();
+
                 }
                 //System.out.println(new String(receivePacket.getData()));
             }
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -114,6 +123,7 @@ public class Connection extends Thread {
             }
         }
         inputComponent = new InputComponent(0);
+        serverInput.setInputComponent(inputComponent);
         startGame = true;
         return true;
     }
@@ -125,8 +135,14 @@ public class Connection extends Thread {
                 if (password.equals(games.get(i).getPassword())) {
                     games.get(i).addConnection(this);
                     startGame = true;
+                    this.gameServer = games.get(i);
                     inputComponent = new InputComponent(games.get(i).numberOfPlayers);
-                    return games.get(i).numberOfPlayers;
+                    gameServer.addPlayer(inputComponent.numberOfPlayer);
+                    serverInput.setInputComponent(inputComponent);
+                    serverInput.setGameServer(this.gameServer);
+                    serverInput.start();
+                    serverOutput.start();
+                    return inputComponent.numberOfPlayer;
                 } else {
                     return -1;
                 }
@@ -146,20 +162,20 @@ public class Connection extends Thread {
     }
 
     public InputComponent getInputComponent() {
-        return inputComponent;
+        return serverInput.getInputComponent();
     }
 
-    public void sendArena(ArenaModel arenaModel) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ObjectOutputStream oos = new ObjectOutputStream(baos);
-        oos.writeObject(arenaModel);
-        oos.flush();
 
-        byte[] buf = baos.toByteArray();;
-        System.out.println("Arena size: " + buf.length);
 
-        DatagramPacket pack = new DatagramPacket(buf, buf.length, addressClient, portClient);
-        serverSocket.send(pack);
-        serverSocket.close();
+    public void setGameServer(GameServer gameServer) {
+        this.gameServer = gameServer;
+    }
+
+    public GameServer getGameServer() {
+        return gameServer;
+    }
+
+    public void sendArena(ArenaModel arenaModel) throws IOException, InterruptedException {
+        serverOutput.setArenaModel(arenaModel);
     }
 }

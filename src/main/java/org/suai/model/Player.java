@@ -20,6 +20,7 @@ public class Player extends GameObject implements Serializable {
     int timeout = 100;
     long lastTime;
     int numberOfMonster = -1;
+    int radiusOfPick = 2;
 
 
     public Player(int x, int y, int width, int height, int maxHealth, int minSpeed, int maxSpeed, int number) {
@@ -30,7 +31,7 @@ public class Player extends GameObject implements Serializable {
         this.minSpeed = minSpeed;
         this.speed = minSpeed;
         this.maxSpeed = maxSpeed;
-        this.weapon = new Weapon(10, 2, 0);
+        this.weapon = new Weapon(10, 2, 500);
         this.number = number;
         lastTime = System.currentTimeMillis();
     }
@@ -145,14 +146,25 @@ public class Player extends GameObject implements Serializable {
         }
     }
 
-    public void update(InputComponent inputComponent, int[][] arena, ArrayList<Monster> monsters) {
+    public void update(InputComponent inputComponent, int[][] arena, ArrayList<Monster> monsters, ArrayList<Flower> flowers) {
 
         if (inputComponent.space) {
-            searchForMonster(monsters);
-            if (numberOfMonster != -1) {
-                weapon.doAttack(monsters.get(numberOfMonster));
+            if (!isDead) {
+                searchForMonster(monsters);
+                if (numberOfMonster != -1) {
+                    weapon.doAttack(monsters.get(numberOfMonster));
+                } else {
+                    for (int i = 0; i < flowers.size(); i++) {
+                        Flower flower = flowers.get(i);
+                        if (!flower.isDead) {
+                            if ((getX() + radiusOfPick > flower.getX() && getX() - radiusOfPick < flower.getX()) &&
+                                    (getY() + radiusOfPick > flower.getY() && getY() - radiusOfPick < flower.getY())) {
+                                enhanceHealth(flower.pick());
+                            }
+                        }
+                    }
+                }
             }
-            inputComponent.space = false;
         }
 
         long delta = System.currentTimeMillis() - lastTime;

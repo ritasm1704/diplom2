@@ -16,7 +16,7 @@ public class Monster extends GameObject implements Serializable {
     int[][] copyOfArena;
     //int[][] copyOfArena2;
 
-    int timeout = 0;
+    int timeout = 200;
     long lastTime;
 
     boolean alg2;
@@ -80,7 +80,7 @@ public class Monster extends GameObject implements Serializable {
         if (nearest != null) {
             if (getX() + weapon.getRadius() > nearest.getX() && getX() - weapon.getRadius() < nearest.getX() &&
                     getY() + weapon.getRadius() > nearest.getY() && getY() - weapon.getRadius() < nearest.getY()) {
-                //weapon.doAttack(nearest);
+                weapon.doAttack(nearest);
             } else {
                 long delta = System.currentTimeMillis() - lastTime;
                 if (delta > timeout) {
@@ -372,6 +372,7 @@ public class Monster extends GameObject implements Serializable {
     }
 
     public void reduceHealth(int a) {
+        //System.out.println("monster: reduce = " + a);
         if (health - a < 0) {
             health = 0;
         }

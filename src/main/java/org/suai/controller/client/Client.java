@@ -11,15 +11,18 @@ import java.nio.charset.StandardCharsets;
 
 public class Client extends Thread {
 
-    Arena arena;
-    ArenaModel arenaModel;
+    private ArenaModel arenaModel;
 
     private InetAddress address;
     private int port;
+    private int serverInputPort = 0;
+    private int serverOutputPort = 0;
 
     boolean isRegistered = false;
 
     DatagramSocket clientSocket = new DatagramSocket();
+    ClientOutput clientOutput;
+    ClientInput clientInput;
 
     public Client(ArenaModel arenaModel, String host, int port) throws SocketException, UnknownHostException {
         this.arenaModel = arenaModel;
@@ -44,22 +47,20 @@ public class Client extends Thread {
             initiationString = initiationString.substring(0, initiationString.indexOf('\n'));
             System.out.println("Server: " + initiationString);
             port = Integer.parseInt(initiationString.split(" ")[1]);
+            serverInputPort = port + 1;
+            serverOutputPort = port + 2;
+            clientOutput = new ClientOutput(address, new DatagramSocket(), serverInputPort);
+            clientInput = new ClientInput(address, new DatagramSocket(), serverOutputPort);
 
             while (true) {
-                System.out.println("is Registered " + isRegistered);
+                //System.out.println("is Registered " + isRegistered);
                 if (isRegistered) {
-                    System.out.println("Client receive");
-                    DatagramPacket pack = new DatagramPacket(new byte[58808], 58808);
-                    clientSocket.receive(pack);
-
-                    ByteArrayInputStream bais = new ByteArrayInputStream(pack.getData());
-                    ObjectInputStream ois = new ObjectInputStream(bais);
-                    arenaModel = (ArenaModel) ois.readObject();
-
+                    System.out.println("is Registered " + isRegistered);
+                    //arenaModel = clientInput.getArenaModel();
                 }
             }
 
-        } catch (IOException | ClassNotFoundException e) {
+        } catch (IOException e) {
             e.printStackTrace();
         }
     }
@@ -84,6 +85,9 @@ public class Client extends Thread {
         if (receiveString.equals("OK")) {
 
             isRegistered = true;
+            System.out.println("Client start " + isRegistered);
+            clientOutput.start();
+            clientInput.start();
             //System.out.println("is Registered " + isRegistered);
             return true;
         } else {
@@ -106,6 +110,9 @@ public class Client extends Thread {
         System.out.println("Server: " + receiveString);
         if (receiveString.split(" ")[0].equals("OK")) {
             isRegistered = true;
+            System.out.println("Client start" + isRegistered);
+            clientOutput.start();
+            clientInput.start();
             //System.out.println("is Registered " + isRegistered);
             return Integer.parseInt(receiveString.split(" ")[1]);
         } else {
@@ -128,15 +135,19 @@ public class Client extends Thread {
     }
 
     public void sendInputComponent(InputComponent inputComponent) throws IOException {
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        ObjectOutputStream oos = new ObjectOutputStream(baos);
-        oos.writeObject(inputComponent);
-        oos.flush();
 
-        byte[] buf = baos.toByteArray();
-        //System.out.println("Input component size: " + buf.length);
+        clientOutput.setInputComponent(inputComponent);
+    }
 
-        DatagramPacket pack = new DatagramPacket(buf, buf.length, address, port);
-        clientSocket.send(pack);
+    public void setGameClient(GameClient gameClient) {
+        clientInput.setGameClient(gameClient);
+    }
+
+    public int getServerInputPort() {
+        return serverInputPort;
+    }
+
+    public int getPort() {
+        return port;
     }
 }

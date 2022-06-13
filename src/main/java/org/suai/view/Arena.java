@@ -1,15 +1,13 @@
 package org.suai.view;
 
-import org.suai.model.ArenaModel;
-import org.suai.model.InputComponent;
-import org.suai.model.Monster;
-import org.suai.model.Player;
+import org.suai.model.*;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.ArrayList;
+import java.util.concurrent.Flow;
 
 public class Arena extends JPanel {
 
@@ -42,6 +40,7 @@ public class Arena extends JPanel {
                 case (KeyEvent.VK_A) -> inputComponent.leftPressed = false;
                 case (KeyEvent.VK_W) -> inputComponent.upPressed = false;
                 case (KeyEvent.VK_S) -> inputComponent.downPressed = false;
+                case (KeyEvent.VK_SPACE) -> inputComponent.space = false;
             }
         }
     }
@@ -74,13 +73,26 @@ public class Arena extends JPanel {
 
         ArrayList<Player> players = arenaModel.getPlayers();
 
-        int xH = 100;
+        /*int xH = 100;
         int yH = 20;
-        int l = 200;
+        int l = 200;*/
 
         for (int i = 0; i < players.size(); i++) {
 
+            //System.out.println(players.get(i).getX() + " " + players.get(i).getY());
             if (!players.get(i).isDead) {
+
+                int xHM = players.get(i).getX() * tileWidth - 5;
+                int yHM = players.get(i).getY() * tileHeight - 10;
+                int lM = 20;
+
+                int tmpM = (int)(players.get(i).getHealth() / (players.get(i).getMaxHealth() * 0.01) * (lM * 0.01));
+                g.setColor(new Color(14, 92, 38));
+                g.fillRect(xHM, yHM, tmpM, 5);
+
+                g.setColor(new Color(92, 14, 14));
+                g.fillRect(xHM + tmpM, yHM, lM - tmpM, 5);
+
                 g.setColor(Color.blue);
             }
             else {
@@ -88,14 +100,7 @@ public class Arena extends JPanel {
             }
             g.fillRect(players.get(i).getX()*tileWidth, players.get(i).getY()*tileHeight,
                     players.get(i).getWidth(), players.get(i).getHeight());
-            if (i == mainPlayer) {
-                int tmp = (int)(players.get(i).getHealth() / (players.get(i).getMaxHealth() * 0.01) * (l * 0.01));
-                g.setColor(new Color(14, 92, 38));
-                g.fillRect(xH, yH, tmp, 20);
 
-                g.setColor(new Color(92, 14, 14));
-                g.fillRect(xH + tmp, yH, l - tmp, 20);
-            }
         }
 
         ArrayList<Monster> monsters = arenaModel.getMonsters();
@@ -119,13 +124,25 @@ public class Arena extends JPanel {
                         monsters.get(i).getWidth(), monsters.get(i).getHeight());
             }
         }
+
+        ArrayList<Flower> flowers = arenaModel.getFlowers();
+
+        for (int i = 0; i < flowers.size(); i++) {
+
+            if (!flowers.get(i).isDead) {
+                g.setColor(new Color(161, 105, 245));
+                g.fillRect(flowers.get(i).getX()*tileHeight, flowers.get(i).getY()*tileWidth,
+                        flowers.get(i).getWidth(), flowers.get(i).getHeight());
+            }
+        }
     }
 
     public int getNumber() {
         return inputComponent.numberOfPlayer;
     }
 
-    public void update() {
+    public void update(ArenaModel arenaModel) {
+        this.arenaModel = arenaModel;
         repaint();
     }
 

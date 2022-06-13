@@ -13,17 +13,39 @@ public class ArenaModel implements Serializable {
     private int heightOfArena;
     private int[][] arenaAsMas;
 
-    ArrayList<Monster> monsters = new ArrayList<>();
-    ArrayList<Player> players = new ArrayList<>();
+    private ArrayList<Monster> monsters = new ArrayList<>();
+    private ArrayList<Player> players = new ArrayList<>();
+    private ArrayList<Flower> flowers = new ArrayList<>();
 
     public ArenaModel(String nameOfMap, int numberOfMonsters, boolean alg2) {
 
         readArena(nameOfMap);
-        players.add(new Player(1,1, 10, 10, 100, 1, 1, 1));
-        for (int i = 0; i < numberOfMonsters; i++) {
-            monsters.add(new Monster(widthOfArena - 2,heightOfArena - 2, 10,10,100, 1, 1000, new Weapon(10,2, 2000), alg2));
-        }
+        if (numberOfMonsters != 0) {
+            for (int m = 0; m < numberOfMonsters; m++) {
 
+                int randY = 0;
+                int randX = 0;
+                while (arenaAsMas[randY][randX] == -1 || randY < 10 && randX < 10) {
+                    randY = 1 + (int) (Math.random() * heightOfArena - 2);
+                    randX = 1 + (int) (Math.random() * widthOfArena - 2);
+                }
+                monsters.add(new Monster(randX, randY, 10,10,100, 1, 5,
+                        new Weapon(10,2, 2000), alg2));
+            }
+
+            int numberOfFlowers = 50;
+
+            for (int m = 0; m < numberOfFlowers; m++) {
+
+                int randY = 0;
+                int randX = 0;
+                while (arenaAsMas[randY][randX] == -1) {
+                    randY = 2 + (int) (Math.random() * heightOfArena - 3);
+                    randX = 2 + (int) (Math.random() * widthOfArena - 3);
+                }
+                flowers.add(new Flower(randX, randY, 10,10, 10));
+            }
+        }
     }
 
     public void update(InputComponent inputComponent) {
@@ -34,16 +56,34 @@ public class ArenaModel implements Serializable {
             }
         }
 
+        for (int i = 0; i < flowers.size(); i++) {
+            if (flowers.get(i).isDead) {
+                flowers.get(i).checkTime();
+            }
+        }
+
         for (int i = 0; i < players.size(); i++) {
+            //System.out.println(players.get(i).getX() + " " + players.get(i).getY());
+            //System.out.println(players.get(i).number + " " + inputComponent.numberOfPlayer);
             if (players.get(i).number == inputComponent.numberOfPlayer) {
-                players.get(i).update(inputComponent, arenaAsMas, monsters);
+                players.get(i).update(inputComponent, arenaAsMas, monsters, flowers);
+                //System.out.println(inputComponent.rightPressed);
+                //System.out.println( "--" + players.get(i).getX() + " " + players.get(i).getY());
                 break;
             }
         }
     }
 
+    public void addPlayer(int number) {
+        players.add(new Player(1,1, 10, 10, 100, 1, 1, number));
+    }
+
     public ArrayList<Player> getPlayers() {
         return players;
+    }
+
+    public ArrayList<Flower> getFlowers() {
+        return flowers;
     }
 
     public ArrayList<Monster> getMonsters() {

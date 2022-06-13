@@ -40,7 +40,7 @@ public class Server {
 
                     String sendString = "port " + countOfPorts + "\n";
                     connections.add(new Connection(countOfPorts, receivePacket.getAddress(), receivePacket.getPort(), this));
-                    countOfPorts++;
+                    countOfPorts += 3;
 
                     byte[] sendData = sendString.getBytes();
                     DatagramPacket sendPacket = new DatagramPacket(sendData, sendData.length, receivePacket.getAddress(), receivePacket.getPort());
