@@ -55,10 +55,8 @@ public class ServerOutput extends Thread {
 
                     DatagramPacket sendPacket = new DatagramPacket(buf, buf.length, address, portClient);
                     serverSocket.send(sendPacket);
+                    //sleep(1);
 
-                    receivePacketPort = new DatagramPacket(new byte[100], 100);
-                    serverSocket.receive(receivePacketPort);
-                    String string = new String(receivePacketPort.getData());
                     //System.out.println(string.substring(0, string.indexOf("\n")));
 
                     ByteArrayOutputStream baos = new ByteArrayOutputStream();
@@ -74,25 +72,21 @@ public class ServerOutput extends Thread {
                     while (count + 1000 < bufLength) {
                         //countOfPacks++;
                         //System.out.println(countOfPacks + "/" + bufLength/1000);
-                        String sendString2 = "1000\n";
+                        String sendString2 = "1000";
                         //System.out.println("Server: " + sendString2);
                         byte[] buf2 = sendString2.getBytes();
 
                         DatagramPacket sendPacket2 = new DatagramPacket(buf2, buf2.length, address, portClient);
                         serverSocket.send(sendPacket2);
 
-                        receivePacketPort = new DatagramPacket(new byte[1000], 1000);
-                        serverSocket.receive(receivePacketPort);
-                        string = new String(receivePacketPort.getData());
-                        //System.out.println(string.substring(0, string.indexOf("\n")));
+                        sleep(1);
 
                         byte[] newBuf = Arrays.copyOfRange(buf, count, count + 1000);
-                        DatagramPacket pack = new DatagramPacket(newBuf, newBuf.length, address, portClient);
-                        serverSocket.send(pack);
+                        sendPacket2 = new DatagramPacket(newBuf, newBuf.length, address, portClient);
+                        serverSocket.send(sendPacket2);
 
-                        receivePacketPort = new DatagramPacket(new byte[1000], 1000);
-                        serverSocket.receive(receivePacketPort);
-                        string = new String(receivePacketPort.getData());
+                        //sleep(1);
+
                         count += 1000;
                         //System.out.println(string.substring(0, string.indexOf("\n")));
                     }
@@ -100,38 +94,37 @@ public class ServerOutput extends Thread {
                     if (count != bufLength) {
                         //System.out.println("count != bufLength - 1");
                         int length = bufLength - count;
-                        String sendString2 = length + "\n";
-                        byte[] buf2 = sendString2.getBytes();
+                        //System.out.println(length);
+                        StringBuilder sendString2 = new StringBuilder(length + "");
+                        //System.out.println(sendString2);
+                        while (sendString2.length() < 4) {
+                            sendString2.insert(0, "0");
+                        }
+                        //System.out.println(sendString2);
+                        byte[] buf2 = sendString2.toString().getBytes();
 
                         DatagramPacket sendPacket2 = new DatagramPacket(buf2, buf2.length, address, portClient);
                         serverSocket.send(sendPacket2);
-                        receivePacketPort = new DatagramPacket(new byte[10], 10);
-                        serverSocket.receive(receivePacketPort);
-                        string = new String(receivePacketPort.getData());
-                        //System.out.println(string.substring(0, string.indexOf("\n")));
+
+                        sleep(1);
 
                         byte[] newBuf = Arrays.copyOfRange(buf, count, count + length);
                         DatagramPacket pack = new DatagramPacket(newBuf, newBuf.length, address, portClient);
                         serverSocket.send(pack);
-                        receivePacketPort = new DatagramPacket(new byte[10], 10);
-                        serverSocket.receive(receivePacketPort);
-                        string = new String(receivePacketPort.getData());
-                        //System.out.println(string.substring(0, string.indexOf("\n")));
+
+                        //sleep(1);
                     }
 
-                    String sendString2 = "END\n";
+                    String sendString2 = "END0";
                     byte[] buf2 = sendString2.getBytes();
 
                     DatagramPacket sendPacket2 = new DatagramPacket(buf2, buf2.length, address, portClient);
                     serverSocket.send(sendPacket2);
 
-                    receivePacketPort = new DatagramPacket(new byte[10], 10);
-                    serverSocket.receive(receivePacketPort);
-                    string = new String(receivePacketPort.getData());
-                    //System.out.println(string.substring(0, string.indexOf("\n")));
+                    sleep(1);
                 }
 
-            } catch (IOException e) {
+            } catch (IOException | InterruptedException e) {
                 e.printStackTrace();
             }
         }

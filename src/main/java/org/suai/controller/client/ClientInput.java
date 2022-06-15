@@ -46,7 +46,7 @@ public class ClientInput extends Thread {
 
         while (true) {
             try {
-                DatagramPacket receivePacket = new DatagramPacket(new byte[100], 100);
+                DatagramPacket receivePacket = new DatagramPacket(new byte[16], 16);
                 clientSocket.receive(receivePacket);
 
                 String receiveString = new String(receivePacket.getData());
@@ -54,24 +54,15 @@ public class ClientInput extends Thread {
                 //System.out.println("Server: " + receiveString);
 
                 if (receiveString.equals("newArena")) {
-                    portCl = "OK\n";
-                    bufPort = portCl.getBytes();
-                    packPort = new DatagramPacket(bufPort, bufPort.length, address, portServer);
-                    clientSocket.send(packPort);
 
                     ByteArrayOutputStream mainBuf = new ByteArrayOutputStream();
 
                     while (true) {
-                        receivePacket = new DatagramPacket(new byte[100], 100);
+                        receivePacket = new DatagramPacket(new byte[4], 4);
                         clientSocket.receive(receivePacket);
                         receiveString = new String(receivePacket.getData());
-                        receiveString = receiveString.substring(0, receiveString.indexOf('\n'));
                         //System.out.println(receiveString);
-                        portCl = "OK\n";
-                        bufPort = portCl.getBytes();
-                        packPort = new DatagramPacket(bufPort, bufPort.length, address, portServer);
-                        clientSocket.send(packPort);
-                        if (receiveString.equals("END")) {
+                        if (receiveString.equals("END0")) {
 
                             break;
                         }
@@ -80,21 +71,16 @@ public class ClientInput extends Thread {
                             clientSocket.receive(receivePacket);
                             mainBuf.write(receivePacket.getData());
 
-                            portCl = "OK\n";
-                            bufPort = portCl.getBytes();
-                            packPort = new DatagramPacket(bufPort, bufPort.length, address, portServer);
-                            clientSocket.send(packPort);
                         } else {
                             //System.out.println(receiveString);
+                            if (receiveString.equals("newA")) {
+                                System.out.println(receiveString);
+                                break;
+                            }
                             int size = Integer.parseInt(receiveString);
                             receivePacket = new DatagramPacket(new byte[size], size);
                             clientSocket.receive(receivePacket);
                             mainBuf.write(receivePacket.getData());
-
-                            portCl = "OK\n";
-                            bufPort = portCl.getBytes();
-                            packPort = new DatagramPacket(bufPort, bufPort.length, address, portServer);
-                            clientSocket.send(packPort);
                         }
                     }
 
