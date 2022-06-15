@@ -62,10 +62,10 @@ public class Arena extends JPanel {
         for (int i = 0; i < arena.length; i++) {
             for (int j = 0; j < arena[0].length; j++) {
                 if (arena[i][j] == -1) {
-                    g.setColor(Color.red);
+                    g.setColor(Color.black);
                     g.fillRect(j*tileHeight, i*tileWidth, tileWidth, tileHeight);
                 } else {
-                    g.setColor(Color.green);
+                    g.setColor(Color.white);
                     g.fillRect(j*tileHeight, i*tileWidth, tileWidth, tileHeight);
                 }
             }
@@ -94,12 +94,15 @@ public class Arena extends JPanel {
                 g.fillRect(xHM + tmpM, yHM, lM - tmpM, 5);
 
                 g.setColor(Color.blue);
+                g.fillRect(players.get(i).getX()*tileWidth, players.get(i).getY()*tileHeight,
+                        players.get(i).getWidth(), players.get(i).getHeight());
             }
             else {
-                g.setColor(Color.white);
+                g.setColor(Color.black);
+                g.drawRect(players.get(i).getX()*tileWidth, players.get(i).getY()*tileHeight,
+                        players.get(i).getWidth(), players.get(i).getHeight());
             }
-            g.fillRect(players.get(i).getX()*tileWidth, players.get(i).getY()*tileHeight,
-                    players.get(i).getWidth(), players.get(i).getHeight());
+
 
         }
 
@@ -118,7 +121,7 @@ public class Arena extends JPanel {
                 g.setColor(new Color(92, 14, 14));
                 g.fillRect(xHM + tmpM, yHM, lM - tmpM, 5);
 
-                g.setColor(Color.black);
+                g.setColor(Color.red);
 
                 g.fillRect(monsters.get(i).getX()*tileHeight, monsters.get(i).getY()*tileWidth,
                         monsters.get(i).getWidth(), monsters.get(i).getHeight());

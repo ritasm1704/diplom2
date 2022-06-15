@@ -95,7 +95,7 @@ public class GameClient extends JFrame {
     }
 
     public static void main(String[] args) throws IOException {
-        GameClient game = new GameClient("map5.txt", 0);
+        GameClient game = new GameClient("mapDemo.txt", 0);
         //game.loop();
     }
 }

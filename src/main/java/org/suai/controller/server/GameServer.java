@@ -22,7 +22,7 @@ public class GameServer extends Thread {
         this.password = password;
         this.admin = admin;
         connections.add(admin);
-        arenaModel = new ArenaModel("map5.txt", 20, false);
+        arenaModel = new ArenaModel("mapDemo.txt", 20, false);
     }
 
     public void run() {
