@@ -5,47 +5,48 @@ import org.suai.model.ArenaModel;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
-import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.InetAddress;
-import java.net.SocketException;
+import java.net.*;
+import java.util.ArrayList;
 import java.util.Arrays;
 
-public class ServerOutput extends Thread {
+public class ServerOutput2 extends Thread{
 
-    private int portClient = 0;
-    private InetAddress address;
+    private int portClient = 4000;
+    //private InetAddress address;
+    private InetAddress broadcastAddress;
     private DatagramSocket serverSocket;
     private ArenaModel arenaModel;
+    private ArrayList<Integer> ports = new ArrayList<>();
+    private ArrayList<Thread> senders = new ArrayList<>();
+    private int serverPort;
 
-    public ServerOutput(InetAddress address, int portServer) throws SocketException {
-        serverSocket = new DatagramSocket(portServer);
+    public ServerOutput2(int port) throws SocketException, UnknownHostException {
+        serverPort = port;
+        serverSocket = new DatagramSocket();
         //this.portClient = portClient;
-        this.address = address;
+        //this.address = address;
+        //System.out.println(serverSocket.getPort());
+        broadcastAddress = InetAddress.getByName("255.255.255.255");
+
+        try {
+            serverSocket.setBroadcast(true);
+        } catch (SocketException e) {
+            e.printStackTrace();
+        }
     }
 
     public void setArenaModel(ArenaModel arenaModel) {
         this.arenaModel = arenaModel;
     }
 
+    public int getPort() {
+        return serverPort;
+    }
+
     @Override
     public void run() {
-
-        DatagramPacket receivePacketPort = new DatagramPacket(new byte[100], 100);
-
-        try {
-            serverSocket.receive(receivePacketPort);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        String stringPort = new String(receivePacketPort.getData());
-        //System.out.println(string.substring(0, string.indexOf("\n")));
-        if (stringPort.substring(0, stringPort.indexOf("\n")).equals("OK")) {
-            portClient = receivePacketPort.getPort();
-            System.out.println("Client port: " + portClient);
-        }
-
         while (true) {
+            //System.out.println("while");
 
             try {
                 if (arenaModel != null) {
@@ -53,9 +54,9 @@ public class ServerOutput extends Thread {
                     //System.out.println("Server: " + sendString);
                     byte[] buf = sendString.getBytes();
 
-                    DatagramPacket sendPacket = new DatagramPacket(buf, buf.length, address, portClient);
+                    DatagramPacket sendPacket = new DatagramPacket(buf, buf.length, broadcastAddress, portClient);
                     serverSocket.send(sendPacket);
-                    sleep(2);
+                    sleep(1);
 
                     //System.out.println(string.substring(0, string.indexOf("\n")));
 
@@ -76,16 +77,16 @@ public class ServerOutput extends Thread {
                         //System.out.println("Server: " + sendString2);
                         byte[] buf2 = sendString2.getBytes();
 
-                        DatagramPacket sendPacket2 = new DatagramPacket(buf2, buf2.length, address, portClient);
+                        DatagramPacket sendPacket2 = new DatagramPacket(buf2, buf2.length, broadcastAddress, portClient);
                         serverSocket.send(sendPacket2);
 
-                        sleep(2);
+                        sleep(1);
 
                         byte[] newBuf = Arrays.copyOfRange(buf, count, count + 1000);
-                        sendPacket2 = new DatagramPacket(newBuf, newBuf.length, address, portClient);
+                        sendPacket2 = new DatagramPacket(newBuf, newBuf.length, broadcastAddress, portClient);
                         serverSocket.send(sendPacket2);
 
-                        sleep(2);
+                        sleep(1);
 
                         count += 1000;
                         //System.out.println(string.substring(0, string.indexOf("\n")));
@@ -103,25 +104,25 @@ public class ServerOutput extends Thread {
                         //System.out.println(sendString2);
                         byte[] buf2 = sendString2.toString().getBytes();
 
-                        DatagramPacket sendPacket2 = new DatagramPacket(buf2, buf2.length, address, portClient);
+                        DatagramPacket sendPacket2 = new DatagramPacket(buf2, buf2.length, broadcastAddress, portClient);
                         serverSocket.send(sendPacket2);
 
-                        sleep(2);
+                        sleep(1);
 
                         byte[] newBuf = Arrays.copyOfRange(buf, count, count + length);
-                        DatagramPacket pack = new DatagramPacket(newBuf, newBuf.length, address, portClient);
+                        DatagramPacket pack = new DatagramPacket(newBuf, newBuf.length, broadcastAddress, portClient);
                         serverSocket.send(pack);
 
-                        sleep(2);
+                        sleep(1);
                     }
 
                     String sendString2 = "END0";
                     byte[] buf2 = sendString2.getBytes();
 
-                    DatagramPacket sendPacket2 = new DatagramPacket(buf2, buf2.length, address, portClient);
+                    DatagramPacket sendPacket2 = new DatagramPacket(buf2, buf2.length, broadcastAddress, portClient);
                     serverSocket.send(sendPacket2);
 
-                    sleep(2);
+                    sleep(1);
                 }
 
             } catch (IOException | InterruptedException e) {

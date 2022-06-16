@@ -14,6 +14,7 @@ public class PanelConnection extends JPanel implements ActionListener {
 
     private JList<String> list;
     private final JButton okButton = new JButton("Выбрать");
+    private final JButton exitButton = new JButton("ВЫХОД");
 
     public PanelConnection(GameClient window) throws IOException {
         this.window = window;
@@ -52,19 +53,28 @@ public class PanelConnection extends JPanel implements ActionListener {
         okButton.setForeground(new Color(83, 69, 122));
         okButton.addActionListener(this);
 
+        exitButton.addActionListener(this);
+        exitButton.setFont(new Font("Serif", Font.PLAIN, 11));
+        exitButton.setBackground(Color.pink);
+        exitButton.setForeground(new Color(29, 10, 59));
+        exitButton.setBounds(700, 650, 100, 20);
 
         add(scrollPane);
         add(text1);
         add(okButton);
+        add(exitButton);
 
         setVisible(true);
-
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
 
-        if (e.getSource() == okButton) {
+        if (e.getSource() == exitButton) {
+            setVisible(false);
+            Panel1 panel = new Panel1(window);
+            window.add(panel);
+        } else if (e.getSource() == okButton) {
             setVisible(false);
             String string = list.getSelectedValue();
             PanelEnterPassword panel = new PanelEnterPassword(window, string);

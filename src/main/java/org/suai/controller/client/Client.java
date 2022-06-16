@@ -23,10 +23,11 @@ public class Client extends Thread {
     DatagramSocket clientSocket = new DatagramSocket();
     ClientOutput clientOutput;
     ClientInput clientInput;
+    boolean broadcast;
 
-    public Client(ArenaModel arenaModel, String host, int port) throws SocketException, UnknownHostException {
+    public Client(boolean broadcast, ArenaModel arenaModel, String host, int port) throws SocketException, UnknownHostException {
         this.arenaModel = arenaModel;
-
+        this.broadcast = broadcast;
         address = InetAddress.getByName(host);
         this.port = port;
     }
@@ -50,15 +51,19 @@ public class Client extends Thread {
             serverInputPort = port + 1;
             serverOutputPort = port + 2;
             clientOutput = new ClientOutput(address, new DatagramSocket(), serverInputPort);
-            clientInput = new ClientInput(address, new DatagramSocket(), serverOutputPort);
+            if (!broadcast) {
+                clientInput = new ClientInput(broadcast, address, new DatagramSocket(), serverOutputPort);
+            } else {
+                clientInput = new ClientInput(broadcast, address, new DatagramSocket(4000), 0);
+            }
 
-            while (true) {
+            /*while (true) {
                 //System.out.println("is Registered " + isRegistered);
                 if (isRegistered) {
                     System.out.println("is Registered " + isRegistered);
                     //arenaModel = clientInput.getArenaModel();
                 }
-            }
+            }*/
 
         } catch (IOException e) {
             e.printStackTrace();
@@ -86,6 +91,7 @@ public class Client extends Thread {
 
             isRegistered = true;
             System.out.println("Client start " + isRegistered);
+
             clientOutput.start();
             clientInput.start();
             //System.out.println("is Registered " + isRegistered);
@@ -111,6 +117,7 @@ public class Client extends Thread {
         if (receiveString.split(" ")[0].equals("OK")) {
             isRegistered = true;
             System.out.println("Client start" + isRegistered);
+
             clientOutput.start();
             clientInput.start();
             //System.out.println("is Registered " + isRegistered);

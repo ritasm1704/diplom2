@@ -154,6 +154,9 @@ public class Arena extends JPanel {
     }
 
     public InputComponent getInputComponent() {
+
+        /*System.out.println(inputComponent.rightPressed + " " + inputComponent.leftPressed + " " +
+                inputComponent.upPressed + " " + inputComponent.downPressed);*/
         return inputComponent;
     }
 

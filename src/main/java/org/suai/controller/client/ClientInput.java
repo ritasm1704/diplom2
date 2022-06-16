@@ -17,16 +17,22 @@ public class ClientInput extends Thread {
     private DatagramSocket clientSocket;
     //private ArenaModel arenaModel;
     private GameClient gameClient;
+    boolean broadcast;
 
-    public ClientInput(InetAddress address, DatagramSocket clientSocket, int portServer) {
+    public ClientInput(boolean broadcast, InetAddress address, DatagramSocket clientSocket, int portServer) {
         this.clientSocket = clientSocket;
         this.portServer = portServer;
         this.address = address;
+        this.broadcast = broadcast;
     }
 
     /*public ArenaModel getArenaModel() {
         return arenaModel;
     }*/
+
+    public void setPortServer(int port) {
+        portServer = port;
+    }
 
     public void setGameClient(GameClient gameClient) {
         this.gameClient = gameClient;
@@ -35,23 +41,28 @@ public class ClientInput extends Thread {
     @Override
     public void run() {
 
-        String portCl = "OK\n";
-        byte[] bufPort = portCl.getBytes();
-        DatagramPacket packPort = new DatagramPacket(bufPort, bufPort.length, address, portServer);
-        try {
-            clientSocket.send(packPort);
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (!broadcast) {
+            String strOk = "OK\n";
+            byte[] bufStrOk = strOk.getBytes();
+            DatagramPacket packPort = new DatagramPacket(bufStrOk, bufStrOk.length, address, portServer);
+            try {
+                clientSocket.send(packPort);
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
 
+
+        //System.out.println(clientSocket.getPort());
+
         while (true) {
+
             try {
-                DatagramPacket receivePacket = new DatagramPacket(new byte[16], 16);
+                DatagramPacket receivePacket = new DatagramPacket(new byte[8], 8);
                 clientSocket.receive(receivePacket);
 
                 String receiveString = new String(receivePacket.getData());
-                receiveString = receiveString.substring(0, receiveString.indexOf('\n'));
-                //System.out.println("Server: " + receiveString);
+                //System.out.println("00Server: " + receiveString);
 
                 if (receiveString.equals("newArena")) {
 

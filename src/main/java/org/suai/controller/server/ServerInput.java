@@ -62,9 +62,9 @@ public class ServerInput extends Thread {
             } catch (IOException | ClassNotFoundException e) {
                 e.printStackTrace();
             }
-
+            //System.out.println("update arena " + inputComponent.numberOfPlayer);
             if (inputComponent != null) {
-                //System.out.println("update arena");
+                //System.out.println("update arena " + inputComponent.numberOfPlayer + " not null");
                 gameServer.updateArenaModel(inputComponent);
             }
         }

@@ -33,11 +33,14 @@ public class Panel1 extends JPanel implements ActionListener {
         //add(BorderLayout.CENTER, connectionButton);
         add(createButton);
         add(connectionButton);
+
+        setVisible(true);
     }
 
 
     @Override
     public void actionPerformed(ActionEvent e) {
+
         if (e.getSource() == connectionButton) {
 
             setVisible(false);

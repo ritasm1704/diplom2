@@ -48,7 +48,7 @@ public class ArenaModel implements Serializable {
         }
     }
 
-    public void update(InputComponent inputComponent) {
+    public synchronized void update(InputComponent inputComponent) {
         //System.out.println("update arena");
         for (int i = 0; i < monsters.size(); i++) {
             if (!monsters.get(i).isDead) {
@@ -67,11 +67,16 @@ public class ArenaModel implements Serializable {
             //System.out.println(players.get(i).number + " " + inputComponent.numberOfPlayer);
             if (players.get(i).number == inputComponent.numberOfPlayer) {
                 players.get(i).update(inputComponent, arenaAsMas, monsters, flowers);
-                //System.out.println(inputComponent.rightPressed);
-                //System.out.println( "--" + players.get(i).getX() + " " + players.get(i).getY());
+
+                // System.out.println( "--" + players.get(i).getX() + " " + players.get(i).getY());
                 break;
             }
         }
+
+        /*if (inputComponent.numberOfPlayer == 1) {
+            System.out.println(inputComponent.rightPressed);
+            System.out.println( "--" + players.get(1).getX() + " " + players.get(1).getY());
+        }*/
     }
 
     public void addPlayer(int number) {

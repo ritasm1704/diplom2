@@ -25,18 +25,22 @@ public class Connection extends Thread {
     private InputComponent inputComponent;
     Server server;
     private boolean startGame = false;
+    boolean broadcast;
+    int broadcastPort;
     //ArrayList<GameServer> games;
 
-    public Connection(int port, InetAddress addressClient, int portClient, Server server) throws UnknownHostException, SocketException {
+    public Connection(boolean broadcast, int port, InetAddress addressClient, int portClient, Server server) throws UnknownHostException, SocketException {
         //address = InetAddress.getByName(host);
         //this.port = port;
         //this.gameServer = gameServer;
+        this.broadcast = broadcast;
         serverSocket = new DatagramSocket(port);
         this.addressClient = addressClient;
         this.portClient = portClient;
         this.server = server;
         serverInput = new ServerInput(addressClient, port + 1);
         serverOutput = new ServerOutput(addressClient, port + 2);
+        //System.out.println(addressClient);
         this.start();
     }
 
@@ -55,7 +59,7 @@ public class Connection extends Thread {
 
                     if (receiveString.split(" ")[0].equals("newGame")) {
                         if (checkGame(receiveString.split(" ")[1])) {
-                            GameServer gameServer = new GameServer(receiveString.split(" ")[1],
+                            GameServer gameServer = new GameServer(broadcast, server.getCountOfBroadcastPorts(), receiveString.split(" ")[1],
                                     receiveString.split(" ")[2], this);
                             gameServer.start();
                             server.setGameServer(gameServer);
@@ -63,7 +67,7 @@ public class Connection extends Thread {
                             gameServer.addPlayer(0);
                             serverInput.setGameServer(this.gameServer);
                             serverInput.start();
-                            serverOutput.start();
+
                             String sendString = "OK";
                             System.out.println("Server: " + sendString);
                             byte[] buf = sendString.getBytes();
@@ -71,6 +75,12 @@ public class Connection extends Thread {
 
                             DatagramPacket sendPacket = new DatagramPacket(buf, buf.length, addressClient, portClient);
                             serverSocket.send(sendPacket);
+
+                            if (!broadcast) {
+                                serverOutput.start();
+                            } else {
+                                //sendPortBroadcast(gameServer.getPort());
+                            }
                         } else {
                             String sendString = "NO";
                             System.out.println("Server: " + sendString);
@@ -95,6 +105,12 @@ public class Connection extends Thread {
 
                             DatagramPacket sendPacket = new DatagramPacket(buf, buf.length, addressClient, portClient);
                             serverSocket.send(sendPacket);
+
+                            if (!broadcast) {
+                                serverOutput.start();
+                            } else {
+                                //sendPortBroadcast(gameServer.getPort());
+                            }
                         } else {
                             String sendString = "NO ";
                             System.out.println("Server: " + sendString);
@@ -128,7 +144,7 @@ public class Connection extends Thread {
         return true;
     }
 
-    public int checkGamePassword(String name, String password) {
+    public int checkGamePassword(String name, String password) throws IOException {
         ArrayList<GameServer> games = server.getGames();
         for (int i = 0; i < games.size(); i++) {
             if (name.equals(games.get(i).getServerName())) {
@@ -141,7 +157,7 @@ public class Connection extends Thread {
                     serverInput.setInputComponent(inputComponent);
                     serverInput.setGameServer(this.gameServer);
                     serverInput.start();
-                    serverOutput.start();
+
                     return inputComponent.numberOfPlayer;
                 } else {
                     return -1;
@@ -164,7 +180,16 @@ public class Connection extends Thread {
     public InputComponent getInputComponent() {
         return serverInput.getInputComponent();
     }
+/*
+    public void sendPortBroadcast(int port) throws IOException {
+        String sendString = "port " + port + "\n";
+        System.out.println("Server: " + sendString);
+        byte[] buf = sendString.getBytes();
+        //System.out.println("Client: " + sendString);
 
+        DatagramPacket sendPacket = new DatagramPacket(buf, buf.length, addressClient, portClient);
+        serverSocket.send(sendPacket);
+    }*/
 
 
     public void setGameServer(GameServer gameServer) {

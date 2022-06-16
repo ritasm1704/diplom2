@@ -19,15 +19,16 @@ public class GameClient extends JFrame {
     ArenaModel arenaModel;
     boolean isOver = false;
 
-    private String host = "localhost";
+    private String host = "192.168.0.108"; //192.168.0.108
     private int port = 2000;
     Client client;
+    boolean broadcast = true;
 
     public GameClient(String title, int numberOfMonsters) throws SocketException, UnknownHostException {
         super(title);
-        System.out.println("Creating Game");
+        System.out.println("Creating Game: broadcast " + broadcast);
         arenaModel = new ArenaModel(title, numberOfMonsters, false);
-        client = new Client(arenaModel, host, port);
+        client = new Client(broadcast, arenaModel, host, port);
         client.start();
 
         add(new Panel1(this));
