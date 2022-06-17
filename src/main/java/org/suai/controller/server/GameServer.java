@@ -27,7 +27,7 @@ public class GameServer extends Thread {
         this.password = password;
         this.admin = admin;
         connections.add(admin);
-        arenaModel = new ArenaModel("mapDemo.txt", 20, false);
+        arenaModel = new ArenaModel("map3.txt", 20, false);
         if (broadcast) {
             serverOutput2 = new ServerOutput2(port);
             serverOutput2.setArenaModel(arenaModel);

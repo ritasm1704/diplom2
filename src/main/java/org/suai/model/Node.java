@@ -18,10 +18,6 @@ public class Node implements Serializable {
         this.cameFrom = cameFrom;
     }
 
-    public static int compare2(Node n1, Node n2) {
-        return Integer.compare(n1.priority, n2.priority);
-    }
-
     public static int compare(Node n1, Node n2) {
         return Integer.compare(n1.costSoFar, n2.costSoFar);
     }

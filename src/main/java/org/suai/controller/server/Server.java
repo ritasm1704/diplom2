@@ -23,12 +23,12 @@ public class Server {
         countOfPorts = port + 1;
         countOfBroadcastPorts = port + 500;
         //Server server = this;
-        URL whatismyip = new URL("http://checkip.amazonaws.com");
+        /*URL whatismyip = new URL("http://checkip.amazonaws.com");
         BufferedReader in = new BufferedReader(new InputStreamReader(
                 whatismyip.openStream()));
 
         String ip = in.readLine(); //you get the IP as a String
-        System.out.println(ip);
+        System.out.println(ip);*/
         //System.out.println(InetAddress.getLocalHost().getHostAddress());
     }
 

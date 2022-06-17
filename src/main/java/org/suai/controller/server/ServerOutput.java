@@ -46,13 +46,13 @@ public class ServerOutput extends Thread {
         }
 
         while (true) {
-
             try {
                 if (arenaModel != null) {
+                    int count2 = 0;
                     String sendString = "newArena\n";
                     //System.out.println("Server: " + sendString);
                     byte[] buf = sendString.getBytes();
-
+                    count2 += buf.length;
                     DatagramPacket sendPacket = new DatagramPacket(buf, buf.length, address, portClient);
                     serverSocket.send(sendPacket);
                     sleep(2);
@@ -65,6 +65,9 @@ public class ServerOutput extends Thread {
                     oos.flush();
 
                     buf = baos.toByteArray();
+                    //count2 += buf.length;
+                    //System.out.println(count2);
+
                     int bufLength = buf.length;
                     int count = 0;
                     //int countOfPacks = 0;
@@ -75,7 +78,7 @@ public class ServerOutput extends Thread {
                         String sendString2 = "1000";
                         //System.out.println("Server: " + sendString2);
                         byte[] buf2 = sendString2.getBytes();
-
+                        count2 += buf2.length + 1000;
                         DatagramPacket sendPacket2 = new DatagramPacket(buf2, buf2.length, address, portClient);
                         serverSocket.send(sendPacket2);
 
@@ -102,7 +105,7 @@ public class ServerOutput extends Thread {
                         }
                         //System.out.println(sendString2);
                         byte[] buf2 = sendString2.toString().getBytes();
-
+                        count2 += buf2.length + length;
                         DatagramPacket sendPacket2 = new DatagramPacket(buf2, buf2.length, address, portClient);
                         serverSocket.send(sendPacket2);
 
@@ -117,11 +120,13 @@ public class ServerOutput extends Thread {
 
                     String sendString2 = "END0";
                     byte[] buf2 = sendString2.getBytes();
-
+                    count2 += buf2.length;
                     DatagramPacket sendPacket2 = new DatagramPacket(buf2, buf2.length, address, portClient);
                     serverSocket.send(sendPacket2);
 
                     sleep(2);
+                    //System.out.println(count2);
+                    //break;
                 }
 
             } catch (IOException | InterruptedException e) {

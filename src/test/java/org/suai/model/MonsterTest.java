@@ -15,14 +15,20 @@ class MonsterTest {
         arenaModel.addPlayer(0);
         monster.update(arenaModel.getArenaAsMas(), arenaModel.getPlayers());
         assertEquals(-1, monster.numberOfPlayer);
-    }
 
-    @Test
-    void algorithm2() {
-    }
+        monster.setX(3);
+        monster.setY(3);
 
-    @Test
-    void reduceHealth() {
+        monster.update(arenaModel.getArenaAsMas(), arenaModel.getPlayers());
+        assertEquals(0, monster.numberOfPlayer);
 
+        long delta = System.currentTimeMillis() - monster.lastTime;
+        while (delta <= monster.timeout) {
+            delta = System.currentTimeMillis() - monster.lastTime;
+        }
+
+        monster.update(arenaModel.getArenaAsMas(), arenaModel.getPlayers());
+        assertEquals(2, monster.getX());
+        assertEquals(2, monster.getY());
     }
 }

@@ -2,22 +2,22 @@ package org.suai.controller.server;
 
 import org.suai.model.ArenaModel;
 
+import java.awt.*;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
 import java.net.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Enumeration;
 
 public class ServerOutput2 extends Thread{
 
-    private int portClient = 4000;
+    private int portClient = 6000;
     //private InetAddress address;
     private InetAddress broadcastAddress;
     private DatagramSocket serverSocket;
     private ArenaModel arenaModel;
-    private ArrayList<Integer> ports = new ArrayList<>();
-    private ArrayList<Thread> senders = new ArrayList<>();
     private int serverPort;
 
     public ServerOutput2(int port) throws SocketException, UnknownHostException {
@@ -26,7 +26,8 @@ public class ServerOutput2 extends Thread{
         //this.portClient = portClient;
         //this.address = address;
         //System.out.println(serverSocket.getPort());
-        broadcastAddress = InetAddress.getByName("255.255.255.255");
+
+        broadcastAddress = InetAddress.getByName("192.168.0.255");
 
         try {
             serverSocket.setBroadcast(true);
@@ -53,7 +54,7 @@ public class ServerOutput2 extends Thread{
                     String sendString = "newArena\n";
                     //System.out.println("Server: " + sendString);
                     byte[] buf = sendString.getBytes();
-
+                    int count2 = buf.length;
                     DatagramPacket sendPacket = new DatagramPacket(buf, buf.length, broadcastAddress, portClient);
                     serverSocket.send(sendPacket);
                     sleep(1);
@@ -66,6 +67,9 @@ public class ServerOutput2 extends Thread{
                     oos.flush();
 
                     buf = baos.toByteArray();
+                    //count2 += buf.length;
+                    //System.out.println(count2);
+
                     int bufLength = buf.length;
                     int count = 0;
                     //int countOfPacks = 0;
@@ -76,7 +80,7 @@ public class ServerOutput2 extends Thread{
                         String sendString2 = "1000";
                         //System.out.println("Server: " + sendString2);
                         byte[] buf2 = sendString2.getBytes();
-
+                        count2 += buf2.length + 1000;
                         DatagramPacket sendPacket2 = new DatagramPacket(buf2, buf2.length, broadcastAddress, portClient);
                         serverSocket.send(sendPacket2);
 
@@ -103,6 +107,7 @@ public class ServerOutput2 extends Thread{
                         }
                         //System.out.println(sendString2);
                         byte[] buf2 = sendString2.toString().getBytes();
+                        count2 += buf2.length + length;
 
                         DatagramPacket sendPacket2 = new DatagramPacket(buf2, buf2.length, broadcastAddress, portClient);
                         serverSocket.send(sendPacket2);
@@ -118,11 +123,13 @@ public class ServerOutput2 extends Thread{
 
                     String sendString2 = "END0";
                     byte[] buf2 = sendString2.getBytes();
-
+                    count2 += buf2.length;
                     DatagramPacket sendPacket2 = new DatagramPacket(buf2, buf2.length, broadcastAddress, portClient);
                     serverSocket.send(sendPacket2);
 
-                    sleep(1);
+                    sleep(12);
+                    //System.out.println(count2);
+                    //break;
                 }
 
             } catch (IOException | InterruptedException e) {
